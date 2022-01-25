@@ -130,12 +130,12 @@ class dwm1001:
                 self.drive_thread.start()
                 break
 
-
+        i = 1
         for x in range(zeit*10):
             try:
                 pos = self.serialPortDWM1001.read_until().split("POS")[1]
                 x_pos, y_pos = pos.split(",")[1:3]
-                log_file.write("x:" + str(x_pos) + " - y:" + str(y_pos) + "\n")
+                log_file.write(i + ". x:" + str(x_pos) + " - y:" + str(y_pos) + "\n")
             except Exception as e:
                 pass
             time.sleep(0.1)        
