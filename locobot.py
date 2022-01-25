@@ -8,6 +8,7 @@ import os
 import numpy as np
 import threading
 from time import sleep
+import logging
 
 
 class dwm1001:
@@ -55,6 +56,10 @@ class dwm1001:
 
 
     def main(self):
+
+        # Init Logger
+        log_file = open("positions.txt", "w")
+
         
         # close the serial port in case the previous run didn't closed it properly
         self.serialPortDWM1001.close()
@@ -101,7 +106,7 @@ class dwm1001:
         
         # create new threads
         self.drive_thread = threading.Thread(target=self.drive, args=(args.speed, args.rotation, args.time))
-        uwb_location_thread = threading.Thread(target=self.uwb_location, args=(args.time, args.rotation))
+        uwb_location_thread = threading.Thread(target=self.uwb_location, args=(args.time, log_file))
 
         # start threads
         uwb_location_thread.start()
@@ -111,6 +116,7 @@ class dwm1001:
         self.drive_thread.join()
 
         print("ODOM End state: " + str(self.robot.base.get_state('odom')))
+        log_file.close()
 
 
     def drive(self, speed, rotation, time):
@@ -118,7 +124,7 @@ class dwm1001:
                            turn_speed=rotation,
                            exe_time=time)
         
-    def uwb_location(self, zeit, rotation):
+    def uwb_location(self, zeit, log_file):
         while True:
             if "lec" in self.serialPortDWM1001.read_until():
                 self.drive_thread.start()
@@ -126,11 +132,12 @@ class dwm1001:
 
 
         for x in range(zeit*10):
-            pos = self.serialPortDWM1001.read_until()
             try:
-                print(pos.split("POS")[1])
+                pos = self.serialPortDWM1001.read_until().split("POS")[1]
+                x_pos, y_pos = pos.split(",")[1:3]
+                log_file.write("x:" + str(x_pos) + " - y:" + str(y_pos) + "\n")
             except Exception as e:
-                print(pos)
+                pass
             time.sleep(0.1)        
 
 
