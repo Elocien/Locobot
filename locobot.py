@@ -141,7 +141,7 @@ class dwm1001:
                 if i == 1:
                     log_file2.write("S: " + "x=" + str(x_pos) + ", y=:" + str(y_pos))
                 if i == 50:
-                    log_file2.write("E: " + "x=" + str(x_pos) + ", y=:" + str(y_pos) + "\n")
+                    log_file2.write(" - E: " + "x=" + str(x_pos) + ", y=:" + str(y_pos) + "\n")
                 i += 1
             except Exception as e:
                 pass
