@@ -88,6 +88,8 @@ class dwm1001:
         parser = argparse.ArgumentParser()
         parser.add_argument("-s", "--speed", metavar="SPEED",
                             type=float, help="linear velocity")
+        parser.add_argument("-r", "--rotation", metavar="ROTATION",
+                            type=float, help="rotational velocity")
         parser.add_argument("-t", "--time", metavar="TIME",
                             type=int, help="execution time")
         args = parser.parse_args()
@@ -104,7 +106,7 @@ class dwm1001:
         
         
         # create new threads
-        self.drive_thread = threading.Thread(target=self.drive, args=(args.speed, args.time))
+        self.drive_thread = threading.Thread(target=self.drive, args=(args.speed, args.rotation, args.time))
         uwb_location_thread = threading.Thread(target=self.uwb_location, args=(args.time, log_file, log_file2))
 
         # start threads
@@ -119,9 +121,9 @@ class dwm1001:
         log_file2.close()
 
 
-    def drive(self, speed, time):
+    def drive(self, speed, rotation, time):
         self.robot.base.set_vel(fwd_speed=speed,
-                           turn_speed=0,
+                           turn_speed=rotation,
                            exe_time=time)
         
     def uwb_location(self, zeit, log_file, log_file2):
@@ -135,8 +137,11 @@ class dwm1001:
             try:
                 pos = self.serialPortDWM1001.read_until().split("POS")[1]
                 x_pos, y_pos = pos.split(",")[1:3]
+                log_file.write(str(i) + ". x:" + str(x_pos) + " - y:" + str(y_pos) + "\n")
+                if i == 1:
+                    log_file2.write("S: " + "x=" + str(x_pos) + ", y=:" + str(y_pos))
                 if i == 50:
-                    log_file2.write(str(x_pos) + ", " + str(y_pos) + "\n")
+                    log_file2.write(" - E: " + "x=" + str(x_pos) + ", y=:" + str(y_pos) + "\n")
                 i += 1
             except Exception as e:
                 pass
